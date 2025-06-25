@@ -12,26 +12,56 @@ def set_theme(theme):
     if theme == "Sombre":
         st.markdown("""
             <style>
-                body { background-color: #0e1117; color: #fafafa; }
-                .stApp { background-color: #0e1117; }
+                html, body, .stApp {
+                    background-color: #1c1e21;
+                    color: #f0f2f6;
+                    font-size: 16px;
+                }
                 .stButton>button, .stDownloadButton>button {
-                    background-color: #4CAF50; color: white;
+                    background-color: #4CAF50;
+                    color: white;
+                    border-radius: 5px;
+                    padding: 0.5em 1em;
+                }
+                .stTextInput>div>div>input,
+                .stFileUploader>div>div {
+                    background-color: #2a2d31;
+                    color: #f0f2f6;
                 }
                 .stCheckbox>label, .stSelectbox label {
-                    color: #fafafa;
+                    color: #f0f2f6;
+                }
+                .stExpanderHeader {
+                    background-color: #2a2d31 !important;
+                    color: #f0f2f6 !important;
                 }
             </style>
         """, unsafe_allow_html=True)
     else:
         st.markdown("""
             <style>
-                body { background-color: #fafafa; color: #0e1117; }
-                .stApp { background-color: #fafafa; }
+                html, body, .stApp {
+                    background-color: #fafafa;
+                    color: #0e1117;
+                    font-size: 16px;
+                }
                 .stButton>button, .stDownloadButton>button {
-                    background-color: #4CAF50; color: white;
+                    background-color: #4CAF50;
+                    color: white;
+                    border-radius: 5px;
+                    padding: 0.5em 1em;
+                }
+                .stTextInput>div>div>input,
+                .stFileUploader>div>div {
+                    background-color: #ffffff;
+                    color: #0e1117;
                 }
                 .stCheckbox>label, .stSelectbox label {
                     color: #0e1117;
+                }
+                .stExpanderHeader {
+                    background-color: #ffffff !important;
+                    color: #0e1117 !important;
                 }
             </style>
         """, unsafe_allow_html=True)
@@ -109,6 +139,7 @@ if uploaded_file:
             plot_ecart(deflateurs_centrals, deflateurs_simulés)
 
             return deflateurs_centrals, deflateurs_simulés
+
         deflateurs_centrals, deflateurs_simulés = analyse_taux_zc(df_zc)
 
         if affichage_tableaux:
@@ -143,5 +174,3 @@ if uploaded_file:
         st.error(f"❌ Erreur lors de l’analyse du fichier : {e}")
 else:
     st.info("📤 Veuillez téléverser un fichier CSV pour lancer l’analyse.")
-
-
