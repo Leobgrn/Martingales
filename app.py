@@ -5,7 +5,7 @@ from io import BytesIO
 from PIL import Image
 
 st.set_page_config(page_title="Analyse des Taux Zéro-Coupon", layout="wide")
-logo = Imge.open("cnp_logo.png")
+logo = Image.open("cnp_logo.png")
 st.image(logo, width=150)
 
 st.title("📈 Analyse de la Martingalité")
