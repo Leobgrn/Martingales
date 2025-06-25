@@ -21,6 +21,7 @@ def analyse_taux_zc(df_zc):
                     deflateurs.loc[traj, t_int] = 1 / (1 + taux)
                 else:
                     deflateurs.loc[traj, t_int] = deflateurs.loc[traj, t_int - 1] * (1 / (1 + taux))
+        deflateurs = deflateurs.mean()
         deflateurs = deflateurs.astype(float)
         deflateurs.index = deflateurs.index + 1
         deflateurs = deflateurs.iloc[:-1]
