@@ -2,10 +2,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import streamlit as st
 from io import BytesIO
+from PIL import Image
 
 st.set_page_config(page_title="Analyse des Taux Zéro-Coupon", layout="wide")
+logo = Imge.open("cnp_logo.png")
+st.image(logo, width=150)
 
-st.title("📈 Analyse des Taux Zéro-Coupon")
+st.title("📈 Analyse de la Martingalité")
 st.markdown("Téléversez un fichier `.csv` (point-virgule, ISO-8859-1) pour analyser les déflateurs et l'écart à la martingalité.")
 
 # === SIDEBAR ===
