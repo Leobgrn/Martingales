@@ -77,6 +77,8 @@ uploaded_file = st.file_uploader("Téléversez un fichier CSV contenant les taux
 
 if uploaded_file is not None:
     df_zc = pd.read_csv(uploaded_file, encoding="ISO-8859-1")
+    st.write("Colonnes détectées :", df_zc.columns.tolist())
+
 
     deflateurs_centrals, deflateurs_simulés = analyse_taux_zc(df_zc)
 
