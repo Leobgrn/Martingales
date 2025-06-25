@@ -2,28 +2,57 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import streamlit as st
 from io import BytesIO
-from PIL import Image
 import io
 
+# === CONFIGURATION DE LA PAGE ===
 st.set_page_config(page_title="Analyse des Taux Zéro-Coupon", layout="wide")
-logo = Image.open("cnp_logo.png")
-st.image(logo, width=150)
 
+# === STYLE PERSONNALISÉ ===
+def set_theme(theme):
+    if theme == "Sombre":
+        st.markdown("""
+            <style>
+                body { background-color: #0e1117; color: #fafafa; }
+                .stApp { background-color: #0e1117; }
+                .stButton>button, .stDownloadButton>button {
+                    background-color: #4CAF50; color: white;
+                }
+                .stCheckbox>label, .stSelectbox label {
+                    color: #fafafa;
+                }
+            </style>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+            <style>
+                body { background-color: #fafafa; color: #0e1117; }
+                .stApp { background-color: #fafafa; }
+                .stButton>button, .stDownloadButton>button {
+                    background-color: #4CAF50; color: white;
+                }
+                .stCheckbox>label, .stSelectbox label {
+                    color: #0e1117;
+                }
+            </style>
+        """, unsafe_allow_html=True)
+
+# === TITRE ===
 st.title("📈 Analyse de la Martingalité")
 st.markdown("Téléversez un fichier `.csv` (point-virgule, ISO-8859-1) pour analyser les déflateurs et l'écart à la martingalité.")
 
 # === SIDEBAR ===
 st.sidebar.header("🧪 Options")
+theme = st.sidebar.selectbox("Choisissez le thème", ["Clair", "Sombre"])
+set_theme(theme)
 affichage_tableaux = st.sidebar.checkbox("Afficher les tableaux", value=True)
 
-# === Upload fichier CSV ===
+# === UPLOAD ===
 uploaded_file = st.file_uploader("📂 Téléversez votre fichier CSV", type=["csv"])
 
 if uploaded_file:
     try:
         df_zc = pd.read_csv(uploaded_file, sep=";", encoding="ISO-8859-1")
 
-        # === ANALYSE ===
         def analyse_taux_zc(df_zc):
             def extraire_zc_1_year(df_zc):
                 df_1y = df_zc[df_zc["Maturité"] == 1].copy()
@@ -36,7 +65,6 @@ if uploaded_file:
                 deflateurs = pd.DataFrame(index=zc_1y.index, columns=zc_1y.columns)
                 for traj in zc_1y.index:
                     for t in zc_1y.columns:
-                        t = int(t)
                         taux = zc_1y.loc[traj, t]
                         if t == 0:
                             deflateurs.loc[traj, t] = 1 / (1 + taux)
@@ -61,20 +89,18 @@ if uploaded_file:
                 annees = sorted(set(deflateurs_centrals.index).intersection(deflateurs_simulés.index))
                 ecart_pct = ((deflateurs_simulés.loc[annees].values / deflateurs_centrals.loc[annees, "Déflateur central"].values) - 1) * 100
 
-                fig, ax = plt.subplots(figsize=(10,5))
-                ax.plot(annees, ecart_pct, marker="o")
+                plt.style.use("dark_background" if theme == "Sombre" else "default")
+                fig, ax = plt.subplots(figsize=(10, 5))
+                ax.plot(annees, ecart_pct, marker="o", color="#1f77b4")
                 ax.axhline(0, color="gray", linestyle="--")
                 ax.set_title("📊 Écart (%) entre déflateur central et simulé")
                 ax.set_xlabel("Maturité (années)")
                 ax.set_ylabel("Écart (%)")
-                ax.grid(True)
+                ax.grid(True, linestyle="--", alpha=0.5)
                 buf = io.BytesIO()
-                fig.savefig(buf,format="png",bbox_inches="tight",dpi=150)
+                fig.savefig(buf, format="png", bbox_inches="tight", dpi=150)
                 buf.seek(0)
-                st.image(buf,use_column_width=False)
-                
-
-            
+                st.image(buf, use_column_width=False)
 
             zc_1y = extraire_zc_1_year(df_zc)
             deflateurs_simulés = calcul_deflateurs_simulés(zc_1y)
@@ -83,35 +109,32 @@ if uploaded_file:
             plot_ecart(deflateurs_centrals, deflateurs_simulés)
 
             return deflateurs_centrals, deflateurs_simulés
-
         deflateurs_centrals, deflateurs_simulés = analyse_taux_zc(df_zc)
 
-        # === AFFICHAGE TABLEAUX ===
         if affichage_tableaux:
             with st.expander("📋 Déflateurs centraux"):
-                st.dataframe(deflateurs_centrals.style.format("{:.5f}"))
+                st.dataframe(deflateurs_centrals.style.format("{:.5f}").background_gradient(cmap="Blues"))
 
             with st.expander("📋 Déflateurs simulés (moyenne sur trajectoires)"):
-                st.dataframe(deflateurs_simulés.to_frame(name="Déflateur simulé").style.format("{:.5f}"))
+                st.dataframe(deflateurs_simulés.to_frame(name="Déflateur simulé").style.format("{:.5f}").background_gradient(cmap="Purples"))
 
-        # === DOWNLOAD BUTTON ===
         st.sidebar.markdown("### 📥 Télécharger les résultats")
 
-        def create_download(df, filename):
+        def create_download(df):
             output = BytesIO()
             df.to_csv(output, sep=";", index=True)
             return output.getvalue()
 
         st.sidebar.download_button(
             label="⬇️ Déflateurs centraux (CSV)",
-            data=create_download(deflateurs_centrals, "deflateurs_centrals.csv"),
+            data=create_download(deflateurs_centrals),
             file_name="deflateurs_centrals.csv",
             mime="text/csv"
         )
 
         st.sidebar.download_button(
             label="⬇️ Déflateurs simulés (CSV)",
-            data=create_download(deflateurs_simulés.to_frame(name="Déflateur simulé"), "deflateurs_simules.csv"),
+            data=create_download(deflateurs_simulés.to_frame(name="Déflateur simulé")),
             file_name="deflateurs_simules.csv",
             mime="text/csv"
         )
@@ -120,4 +143,5 @@ if uploaded_file:
         st.error(f"❌ Erreur lors de l’analyse du fichier : {e}")
 else:
     st.info("📤 Veuillez téléverser un fichier CSV pour lancer l’analyse.")
+
 
