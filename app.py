@@ -26,12 +26,12 @@ def analyse_taux_zc(df_zc):
 
     def extraire_courbe_centrale(df_zc):
         df_filtré = df_zc[(df_zc["TRAJECTOIRE"] == 1) & (df_zc["Maturité"].between(1, 50))].copy()
-        courbe_centrale = df_filtré[["Maturité", 0]].set_index("Maturité").sort_index()
+        courbe_centrale = df_filtré[["Maturité", "0"]].set_index("Maturité").sort_index()
         courbe_centrale.columns = ["Taux courbe centrale"]
         return courbe_centrale
 
     def calculer_deflateur_central(courbe_centrale):
-        deflateurs = [1 / (1 + taux) ** Maturité for Maturité, taux in courbe_centrale["Taux courbe centrale"].items()]
+        deflateurs = [1 / (1 + taux) ** maturité for maturité, taux in courbe_centrale["Taux courbe centrale"].items()]
         return pd.DataFrame({"Déflateur central": deflateurs}, index=courbe_centrale.index)
 
     def plot_ecart_pourcentage_par_maturité(deflateurs_centrals, df_deflateurs_output):
@@ -44,15 +44,15 @@ def analyse_taux_zc(df_zc):
         df_deflateurs_output.columns = df_deflateurs_output.columns.astype(int)
         df_deflateurs_output = df_deflateurs_output.sort_index(axis=1)
 
-        années = sorted(set(deflateurs_centrals.index).intersection(df_deflateurs_output.columns))
+        annees = sorted(set(deflateurs_centrals.index).intersection(df_deflateurs_output.columns))
 
-        deflateur_central = deflateurs_centrals.loc[années, "Déflateur central"].values
-        deflateur_simulé = df_deflateurs_output[années].mean().values
+        deflateur_central = deflateurs_centrals.loc[annees, "Déflateur central"].values
+        deflateur_simulé = df_deflateurs_output[annees].mean().values
 
         ecart_pct = ((deflateur_simulé / deflateur_central) - 1) * 100
 
         plt.figure(figsize=(10, 5))
-        plt.plot(années, ecart_pct, marker="o", color="teal")
+        plt.plot(annees, ecart_pct, marker="o")
         plt.axhline(0, color="gray", linestyle="--")
         plt.title("Écart en % de la martingalité (déflateur Output vs Input)")
         plt.xlabel("Maturité (années)")
@@ -76,14 +76,14 @@ st.title("Analyse des Taux Zéro-Coupon")
 uploaded_file = st.file_uploader("Téléversez un fichier CSV contenant les taux zéro-coupon", type=["csv"])
 
 if uploaded_file is not None:
-    df_zc = pd.read_csv(uploaded_file, encoding="ISO-8859-1",sep =";")
-    st.write("Colonnes détectées :", df_zc.columns.tolist())
+    try:
+        df_zc = pd.read_csv(uploaded_file, encoding="ISO-8859-1", sep=";")
+        deflateurs_centrals, deflateurs_simulés = analyse_taux_zc(df_zc)
 
+        st.subheader("Déflateurs Centraux")
+        st.dataframe(deflateurs_centrals)
 
-    deflateurs_centrals, deflateurs_simulés = analyse_taux_zc(df_zc)
-
-    st.subheader("Déflateurs Centraux")
-    st.dataframe(deflateurs_centrals)
-
-    st.subheader("Déflateurs Simulés")
-    st.dataframe(deflateurs_simulés)
+        st.subheader("Déflateurs Simulés")
+        st.dataframe(deflateurs_simulés)
+    except Exception as e:
+        st.error(f"Erreur lors de la lecture ou l’analyse du fichier : {e}")
