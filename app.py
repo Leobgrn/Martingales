@@ -138,7 +138,7 @@ if uploaded_file:
                 ecart_pct = ((deflateurs_simulés.loc[annees].values / deflateurs_centrals.loc[annees, "Déflateur central"].values) - 1) * 100
 
                 plt.style.use("dark_background" if theme == "Sombre" else "default")
-                fig, ax = plt.subplots(figsize=(4, 2.5))
+                fig, ax = plt.subplots(figsize=(10, 6))
                 ax.plot(annees, ecart_pct, marker="o", color="#00ffe1")
                 ax.axhline(0, color="gray", linestyle="--")
                 ax.set_title("📊 Écart (%) entre déflateur central et simulé", fontsize=10)
