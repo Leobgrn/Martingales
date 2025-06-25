@@ -76,7 +76,8 @@ st.title("Analyse des Taux Zéro-Coupon")
 uploaded_file = st.file_uploader("Téléversez un fichier CSV contenant les taux zéro-coupon", type=["csv"])
 
 if uploaded_file is not None:
-    df_zc = pd.read_csv(uploaded_file)
+    df_zc = pd.read_csv(uploaded_file, encoding="ISO-8859-1")
+
     deflateurs_centrals, deflateurs_simulés = analyse_taux_zc(df_zc)
 
     st.subheader("Déflateurs Centraux")
