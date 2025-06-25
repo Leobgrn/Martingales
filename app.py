@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import streamlit as st
 from io import BytesIO
 from PIL import Image
+import io
 
 st.set_page_config(page_title="Analyse des Taux Zéro-Coupon", layout="wide")
 logo = Image.open("cnp_logo.png")
@@ -60,14 +61,20 @@ if uploaded_file:
                 annees = sorted(set(deflateurs_centrals.index).intersection(deflateurs_simulés.index))
                 ecart_pct = ((deflateurs_simulés.loc[annees].values / deflateurs_centrals.loc[annees, "Déflateur central"].values) - 1) * 100
 
-                fig, ax = plt.subplots(figsize=(1, 0.5))
+                fig, ax = plt.subplots(figsize=(4, 2.5))
                 ax.plot(annees, ecart_pct, marker="o")
                 ax.axhline(0, color="gray", linestyle="--")
                 ax.set_title("📊 Écart (%) entre déflateur central et simulé")
                 ax.set_xlabel("Maturité (années)")
                 ax.set_ylabel("Écart (%)")
                 ax.grid(True)
-                st.pyplot(fig)
+                buf = io.BytesIO()
+                fig.savefig(buf,format="png",bbox_inches="tight",dpi=150)
+                buf.seek(0)
+                st.image(buf,use_column_width=False)
+                
+
+            
 
             zc_1y = extraire_zc_1_year(df_zc)
             deflateurs_simulés = calcul_deflateurs_simulés(zc_1y)
