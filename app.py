@@ -76,7 +76,7 @@ st.title("Analyse des Taux Zéro-Coupon")
 uploaded_file = st.file_uploader("Téléversez un fichier CSV contenant les taux zéro-coupon", type=["csv"])
 
 if uploaded_file is not None:
-    df_zc = pd.read_csv(uploaded_file, encoding="ISO-8859-1")
+    df_zc = pd.read_csv(uploaded_file, encoding="ISO-8859-1",sep =";")
     st.write("Colonnes détectées :", df_zc.columns.tolist())
 
 
