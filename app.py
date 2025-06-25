@@ -11,14 +11,16 @@ def analyse_taux_zc(df_zc):
         return df_1y
 
     def calcul_deflateurs_simulés(zc_1y):
+        zc_1y.columns = zc_1y.columns.astype(int)
         deflateurs = pd.DataFrame(index=zc_1y.index, columns=zc_1y.columns)
         for traj in zc_1y.index:
             for t in zc_1y.columns:
+                t_int = int(t)
                 taux = zc_1y.loc[traj, t]
-                if t == 0:
-                    deflateurs.loc[traj, t] = 1 / (1 + taux)
+                if t_int == 0:
+                    deflateurs.loc[traj, t_int] = 1 / (1 + taux)
                 else:
-                    deflateurs.loc[traj, t] = deflateurs.loc[traj, t - 1] * (1 / (1 + taux))
+                    deflateurs.loc[traj, t_int] = deflateurs.loc[traj, t_int - 1] * (1 / (1 + taux))
         deflateurs = deflateurs.astype(float)
         deflateurs.index = deflateurs.index + 1
         deflateurs = deflateurs.iloc[:-1]
