@@ -91,7 +91,7 @@ set_theme(theme)
 affichage_tableaux = st.sidebar.checkbox("Afficher les tableaux", value=True)
 
 # === TITRE ===
-st.title("📈 Analyse de la Martingalité")
+st.title("Analyse de la Martingalité")
 st.markdown("Téléversez un fichier `.csv` (point-virgule, ISO-8859-1) pour analyser les déflateurs et l'écart à la martingalité.")
 
 # === UPLOAD ===
